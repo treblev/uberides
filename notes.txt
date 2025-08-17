@@ -1,0 +1,5 @@
+Steps:
+1. Create python script to generate synthetic data
+2. Upload to Azure storage. (use connection string of storage account)
+3. Create Snowflake DB 
+4. Create connection between SF and Azure. Use sas or storage integration via service principal. 

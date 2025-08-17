@@ -1,0 +1,10 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+target/
+dbt_packages/
+logs/
+.env
+*.log
+lake/

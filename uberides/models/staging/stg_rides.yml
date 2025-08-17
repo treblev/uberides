@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: stg_rides
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "fare_total >= 0"
+    columns:
+      - name: ride_id
+        tests: [not_null, unique]
+      - name: pickup_at
+        tests: [not_null]
+      - name: dropoff_at
+        tests: [not_null]
+      - name: status
+        tests:
+          - accepted_values:
+              values: ["completed","cancelled","no_show"]

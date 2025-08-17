@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: raw_ext
+    database: UBERIDES
+    schema: RAW_EXT
+    tables:
+      - name: rides_ext 
