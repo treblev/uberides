@@ -1,0 +1,8 @@
+version: 2
+models:
+  - name: fct_rides_daily_city
+    columns:
+      - name: city
+        tests: [not_null]
+      - name: ride_date
+        tests: [not_null] 
