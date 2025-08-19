@@ -3,6 +3,9 @@ models:
   - name: fct_rides_daily_city
     columns:
       - name: city
-        tests: [not_null]
+        tests:           
+          - relationships:            
+              to: ref('dim_city')
+              field: city_name 
       - name: ride_date
         tests: [not_null] 
