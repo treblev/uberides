@@ -1,14 +1,13 @@
 {{ config(materialized='table') }}
 
-WITH cities as (
-    select 1 as city_id, 'Phoenix' as city_name, 'AZ' as city_state, '2000-01-01' as start_date, NULL as end_date
-    UNION 
-    select 2 as city_id, 'Los Angeles' as city_name, 'CA' as city_state, '2000-01-01' as start_date, NULL as end_date
-    UNION 
-    select 3 as city_id, 'San Francisco' as city_name, 'CA' as city_state, '2000-01-01' as start_date, NULL as end_date
-    UNION 
-    select 4 as city_id, 'New York' as city_name, 'NY' as city_state, '2000-01-01' as start_date, NULL as end_date
-    UNION 
-    select 5 as city_id, 'Chicago' as city_name, 'IL' as city_state, '2000-01-01' as start_date, NULL as end_date
+with cities(city_id, city_name, city_state, start_date, end_date) as (
+  select column1::int, column2::string, column3::string, column4::date, column5::date
+  from values
+    (1, 'Phoenix',      'AZ', '2000-01-01'::date, null),
+    (2, 'Los Angeles',  'CA', '2000-01-01'::date, null),
+    (3, 'San Francisco','CA', '2000-01-01'::date, null),
+    (4, 'New York',     'NY', '2000-01-01'::date, null),
+    (5, 'Chicago',      'IL', '2000-01-01'::date, null)
 )
-SELECT * FROM cities  
+
+select * from cities
