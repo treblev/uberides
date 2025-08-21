@@ -1,0 +1,8 @@
+version: 2
+models:
+  - name: dim_city
+    columns:
+      - name: city_id
+        tests: [not_null, unique]
+      - name: city_name
+        tests: [not_null] 
