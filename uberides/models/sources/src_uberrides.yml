@@ -5,4 +5,12 @@ sources:
     database: UBERIDES
     schema: RAW_EXT
     tables:
-      - name: rides_ext 
+      - name: rides_ext_with_loadts
+        loaded_at_field: loaded_at
+        freshness:
+          warn_after:
+            count: 36
+            period: hour
+          error_after:
+            count: 48
+            period: hour
