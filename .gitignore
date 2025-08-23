@@ -8,3 +8,5 @@ logs/
 .env
 *.log
 lake/
+.uberides.env
+.tmp_dagster*

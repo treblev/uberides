@@ -8,12 +8,37 @@ from datetime import date, datetime, timedelta, time, timezone
 import numpy as np
 import pandas as pd
 import holidays
+from typing import Dict
 
 try:
     from azure.storage.blob import BlobServiceClient, ContentSettings
     AZURE_AVAILABLE = True
 except Exception:
     AZURE_AVAILABLE = False
+
+
+# -----------------------------
+# Simple .env-style state file
+# -----------------------------
+def read_env_file(path: str) -> Dict[str, str]:
+    """Read a simple KEY=VALUE file. Ignores blank lines and comments (#...)."""
+    env: Dict[str, str] = {}
+    if not path or not os.path.exists(path):
+        return env
+    with open(path, "r") as f:
+        for line in f:
+            s = line.strip()
+            if not s or s.startswith("#") or "=" not in s:
+                continue
+            k, v = s.split("=", 1)
+            env[k.strip()] = v.strip()
+    return env
+
+def write_env_file(path: str, mapping: Dict[str, str]) -> None:
+    """Write a simple KEY=VALUE file (overwrites)."""
+    with open(path, "w") as f:
+        for k, v in mapping.items():
+            f.write(f"{k}={v}\n")
 
 
 # -----------------------------
@@ -352,21 +377,42 @@ def main():
     parser.add_argument("--mean", type=float, default=1200.0,
                         help="Weekday mean rides/day across all cities BEFORE weekend/holiday multipliers.")
     # Azure config
-    parser.add_argument("--azure-container", type=str, default="uberides-raw")
+    parser.add_argument("--azure-container", type=str, default="raw")
+    parser.add_argument("--state-file", type=str, default=".uberides.env",
+                        help="Path to .env-like file storing LAST_DATE (YYYY-MM-DD).")
+    parser.add_argument("--ignore-state", action="store_true",
+                        help="If set, do not read or update the state file; fall back to --days.")
     args = parser.parse_args()
 
     rng = np.random.default_rng(args.seed)
 
     today = date.today()
-    end_date = today - timedelta(days=1)
-    start_date = end_date - timedelta(days=args.days-1)
+    # If state is enabled and a LAST_DATE exists, resume from the day after it.
+    if not args.ignore_state:
+        state = read_env_file(args.state_file)
+        last_str = state.get("LAST_DATE")
+    else:
+        state = {}
+        last_str = None
+
+    if last_str:
+        try:
+            last_date = datetime.strptime(last_str, "%Y-%m-%d").date()
+        except ValueError:
+            raise RuntimeError(f"Invalid LAST_DATE in {args.state_file}: {last_str!r}. Expected YYYY-MM-DD.")
+        start_date = last_date + timedelta(days=1)
+    else:
+        # Fall back to historical backfill of --days ending today
+        start_date = today - timedelta(days=args.days-1)
+
+    end_date = today  # inclusive through today
 
     if args.out == "azure":
         if not AZURE_AVAILABLE:
             raise RuntimeError("azure-storage-blob not available. Install it and try again.")
-        conn = os.environ.get("AZURE_STORAGE_CONNECTION_STRING")
+        conn = os.environ.get("AZURE_UBERRIDES_STORAGE_CONNECTION_STRING")
         if not conn:
-            raise RuntimeError("Set AZURE_STORAGE_CONNECTION_STRING for Azure output.")
+            raise RuntimeError("Set AZURE_UBERRIDES_STORAGE_CONNECTION_STRING for Azure output.")
         bsc = BlobServiceClient.from_connection_string(conn)
         container_client = bsc.get_container_client(args.azure_container)
         try:
@@ -377,6 +423,7 @@ def main():
         container_client = None
 
     total_rows = 0
+    last_processed = None
     d = start_date
     while d <= end_date:
         df = build_day_df(rng, d, args.mean)
@@ -389,7 +436,16 @@ def main():
             outpath = write_azure(df, container_client, d)
         print(f"{d.isoformat()} -> {outpath} [{len(df)} rows]")
         total_rows += len(df)
+        last_processed = d
         d += timedelta(days=1)
+
+    # Update the state file to remember the most recent date we attempted/generated.
+    if not args.ignore_state:
+        # If nothing ran (e.g., start_date > end_date), keep existing LAST_DATE if present.
+        new_last = (last_processed or (datetime.strptime(state["LAST_DATE"], "%Y-%m-%d").date() if state.get("LAST_DATE") else None))
+        if new_last:
+            state["LAST_DATE"] = new_last.isoformat()
+            write_env_file(args.state_file, state)
 
     print(f"Done. Wrote ~{total_rows:,} rows across {args.days} days.")
 
