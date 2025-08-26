@@ -2,7 +2,7 @@
 
 with source as (
   select *
-  from {{ source('raw_ext','rides_ext_with_loadts') }}
+  from {{ source('bronze','rides_base') }}
 ),
 
 renamed as (

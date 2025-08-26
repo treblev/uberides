@@ -14,3 +14,8 @@ sources:
           error_after:
             count: 48
             period: hour
+  - name: bronze
+    database: UBERIDES
+    schema: BRONZE
+    tables:
+     - name: rides_base 

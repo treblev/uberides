@@ -7,10 +7,11 @@ This project simulates a data pipeline for Uberides, involving synthetic data ge
 - ✅ Synthetic Data Generation  
 - ✅ Upload to Azure Storage  
 - ✅ Snowflake Database Creation  
-- ✅ Connection Setup Between Snowflake and Azure Storage
+- ✅ Connection Setup Between Snowflake and Azure Storage - manual 
 - ✅ dbt Staging/Models  
 - ✅ Metrics/Marts  
 - ✅ Dagster Orchestration - Trigger at Preset Time.
+- ✅ Snowpipe automatically picks up file uploads to storage container
 
 ## Upcoming Modules
 
