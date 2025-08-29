@@ -4,8 +4,13 @@ models:
     columns:
       - name: city
         tests:           
-          - relationships:            
-              to: ref('dim_city')
-              field: city_name 
+          - relationships:
+              arguments:             
+                to: ref('dim_city')
+                field: city_name 
       - name: ride_date
         tests: [not_null] 
+    tests:
+      - unique:
+          arguments:
+            column_name: "city || '-' || ride_date"
