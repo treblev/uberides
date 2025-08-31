@@ -1,13 +1,16 @@
 name: uberides-weekly
 
 on:
+  workflow_dispatch:
   schedule:
+    # Friday 20:05 Phoenix ~= Saturday 03:05 UTC
     - cron: "5 3 * * 6"
-  workflow_dispatch: {}  
 
 jobs:
   run:
     runs-on: ubuntu-latest
+    env:
+      AZURE_UBERRIDES_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_UBERRIDES_STORAGE_CONNECTION_STRING }}
 
     steps:
       - name: Checkout
@@ -19,32 +22,38 @@ jobs:
           python-version: "3.11"
 
       - name: Install deps
-        run: pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      # Restore last-run state file if it exists
-      - name: Restore state (.uberides.env)
+      # ---- OPTIONAL STATE RESTORE (non-fatal on first run) ----
+      - name: Try restore previous state artifact
+        id: try-restore
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: uberides-state
           path: .
-        continue-on-error: true  # first run won't have it
+      - name: Show state presence
+        run: |
+          ls -la . || true
+          [ -f .uberides.env ] && echo "Found .uberides.env" || echo "No state file yet (first run is OK)"
 
-      - name: Run weekly generator via Dagster job
-        env:
-          AZURE_UBERRIDES_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_UBERRIDES_STORAGE_CONNECTION_STRING }}
+      # ---- RUN DAGSTER JOB ----
+      - name: Run weekly generator
         run: |
           python - <<'PY'
           from dagster_repo import uberides_weekly_job
           result = uberides_weekly_job.execute_in_process()
           if not result.success:
-              raise SystemExit(1)
+              raise SystemExit("Dagster job failed")
           PY
 
-      # Save updated state for the next run
-      - name: Persist state (.uberides.env)
-        if: always()
+      # ---- UPLOAD/REFRESH STATE FOR NEXT RUN ----
+      - name: Upload state (only if file exists)
+        if: ${{ hashFiles('.uberides.env') != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: uberides-state
-          path: .uberides.env
-          retention-days: 120
+          path: ./.uberides.env
+          if-no-files-found: ignore
