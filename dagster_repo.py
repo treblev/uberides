@@ -4,7 +4,6 @@ import subprocess
 from pathlib import Path
 from dagster import Definitions, op, job, ScheduleDefinition
 
-# === Config ===
 AZ_VAR = "AZURE_UBERRIDES_STORAGE_CONNECTION_STRING" 
 AZ_CONTAINER = "raw"               
 GEN_DAYS_WEEKLY = "7"
@@ -51,7 +50,7 @@ def uberides_weekly_job():
 weekly_schedule = ScheduleDefinition(
     name="uberides_weekly_schedule",
     job=uberides_weekly_job,
-    cron_schedule="45 20 * * 5",  # Fri 8:45 PM
+    cron_schedule="44 19 * * 6",  # Fri 7:45 PM
     execution_timezone="America/Phoenix",
 )
 

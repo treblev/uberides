@@ -1,0 +1,50 @@
+name: uberides-weekly
+
+on:
+  schedule:
+    - cron: "5 3 * * 6"
+  workflow_dispatch: {}  
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      # Restore last-run state file if it exists
+      - name: Restore state (.uberides.env)
+        uses: actions/download-artifact@v4
+        with:
+          name: uberides-state
+          path: .
+        continue-on-error: true  # first run won't have it
+
+      - name: Run weekly generator via Dagster job
+        env:
+          AZURE_UBERRIDES_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_UBERRIDES_STORAGE_CONNECTION_STRING }}
+        run: |
+          python - <<'PY'
+          from dagster_repo import uberides_weekly_job
+          result = uberides_weekly_job.execute_in_process()
+          if not result.success:
+              raise SystemExit(1)
+          PY
+
+      # Save updated state for the next run
+      - name: Persist state (.uberides.env)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: uberides-state
+          path: .uberides.env
+          retention-days: 120
