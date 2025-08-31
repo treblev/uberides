@@ -5,13 +5,13 @@ with daily as (
   select
     city,
     ride_date,
-    sum(rides)            as rides_total,
-    sum(gross_fare)       as revenue_total,
-    avg(avg_fare)         as avg_fare,          -- adjust to your column names
-    avg(avg_duration_min) as avg_duration_min,  -- remove if not in source
-    avg(avg_wait_min)     as avg_wait_min,      -- remove if not in source
-    avg(cancel_rate)      as cancel_rate,
-    avg(no_show_rate)     as no_show_rate
+    coalesce(sum(rides_total),0)            as rides_total,
+    coalesce(sum(revenue_total),0)       as revenue_total,
+    coalesce(avg(avg_fare),0)        as avg_fare,          
+    coalesce(avg(avg_duration_min),0) as avg_duration_min,  
+    coalesce(avg(avg_wait_min),0) as avg_wait_min,      
+    coalesce(avg(rides_not_completed),0)      as cancel_rate,
+    coalesce(avg(no_show_rate),0)     as no_show_rate
   from {{ ref('fct_rides_daily_city') }}
   group by 1,2
 ),
