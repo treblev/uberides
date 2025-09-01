@@ -15,6 +15,9 @@ with daily as (
     coalesce(avg(rides_not_completed),0)      as cancel_rate,
     coalesce(avg(no_show_rate),0)     as no_show_rate
   from {{ ref('fct_rides_daily_city') }}
+  {% if is_incremental() %}
+    where ride_date > (select coalesce(max(ride_date)-30,to_date('2024-08-17')) from {{ this }} )
+  {% endif %}
   group by 1,2
 ),
 
