@@ -12,8 +12,10 @@ This project simulates a data pipeline for Uberides, involving synthetic data ge
 - ✅ Metrics/Marts  
 - ✅ Dagster Orchestration - Trigger at Preset Time.
 - ✅ Snowpipe automatically picks up file uploads to storage container
+- ✅ GitHub Actions to upload data into Azure Storage Container.
 
 ## Upcoming Modules
 
 - Dagster in Container 
-- GitHub CI/CD and/or Azure Actions
+- Azure Actions
+- Snowflake Security (roles, sharing, etc.)
