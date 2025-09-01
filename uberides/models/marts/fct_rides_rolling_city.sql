@@ -1,10 +1,12 @@
-{{ config(materialized='incremental',
-          unique_key='city||to_char(ride_date, ''YYYY-MM-DD'')') }}
+{{ config(
+    materialized='incremental',
+    unique_key=['city', 'ride_date']
+) }}
 
 with daily as (
   select
     city,
-    ride_date,
+    cast(ride_date as date) as ride_date,
     coalesce(sum(rides_total),0)            as rides_total,
     coalesce(sum(revenue_total),0)       as revenue_total,
     coalesce(avg(avg_fare),0)        as avg_fare,          

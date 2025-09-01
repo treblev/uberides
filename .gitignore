@@ -10,3 +10,4 @@ logs/
 lake/
 .uberides.env
 .tmp_dagster*
+.DS_Store

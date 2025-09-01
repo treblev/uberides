@@ -19,3 +19,5 @@ This project simulates a data pipeline for Uberides, involving synthetic data ge
 - Dagster in Container 
 - Azure Actions
 - Snowflake Security (roles, sharing, etc.)
+- Streamlit prediction app
+- MCP Server 
