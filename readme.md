@@ -19,5 +19,8 @@ This project simulates a data pipeline for Uberides, involving synthetic data ge
 - Dagster in Container 
 - Azure Actions
 - Snowflake Security (roles, sharing, etc.)
-- Streamlit prediction app
+- Streamlit prediction app (predict no. of rides, cancels)
 - MCP Server 
+- Dbt Observability (freshness checks, lineage)
+- Snowflake Monitoring (ingested files, errors, latency, etc.)
+- Alerts on GitHub actions status.
