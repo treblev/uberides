@@ -2,9 +2,9 @@ name: uberides-weekly
 
 on:
   workflow_dispatch:
-  schedule:
-    # Friday 20:05 Phoenix ~= Saturday 03:05 UTC
-    - cron: "5 3 * * 6"
+  # schedule:
+  #   # Friday 20:05 Phoenix ~= Saturday 03:05 UTC
+  #   - cron: "5 3 * * 6"
 
 jobs:
   run:
